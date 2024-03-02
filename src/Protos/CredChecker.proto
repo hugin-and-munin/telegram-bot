@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package cred_checker;
+
+option go_package = "github.com/hugin-and-munin/cred-checker";
+
+service CredChecker {
+  rpc GetDigitalMinistryCreditsState(GetDigitalMinistryCreditsStateRequest) returns (GetDigitalMinistryCreditsStateResponse);
+}
+
+enum CreditState {
+  UNKNOWN = 0;
+  CREDITED = 1;
+  NOT_CREDITED = 2;
+}
+
+message GetDigitalMinistryCreditsStateRequest {
+  string inn = 1;
+}
+
+message GetDigitalMinistryCreditsStateResponse {
+  string name = 1;
+  string inn = 2;
+  CreditState state = 3;
+}

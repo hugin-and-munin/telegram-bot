@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <RootNamespace>CorporatePulse.Bot</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Google.Protobuf" Version="3.18.0" />
+    <PackageReference Include="Grpc.AspNetCore.Server.ClientFactory" Version="2.60.0" />
+    <PackageReference Include="Grpc.Net.Client" Version="2.60.0" />
+    <PackageReference Include="Grpc.Net.ClientFactory" Version="2.60.0" />
+    <PackageReference Include="Grpc.Tools" Version="2.60.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
+    <PackageReference Include="Telegram.Bot" Version="19.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Protobuf ProtoRoot="Protos" Include="Protos/Report.proto" GrpcServices="Client">
+      <SourceUrl>https://raw.githubusercontent.com/hugin-and-munin/hugin-and-munin/main/src/Protos/Report.proto</SourceUrl>
+    </Protobuf>
+    <Protobuf ProtoRoot="Protos" Include="Protos/CredChecker.proto" GrpcServices="Client">
+      <SourceUrl>https://raw.githubusercontent.com/hugin-and-munin/cred-checker/master/api/cred-checker.proto</SourceUrl>
+    </Protobuf>
+    <Protobuf ProtoRoot="Protos" Include="Protos/LegalEntities.proto" GrpcServices="Client">
+      <SourceUrl>https://raw.githubusercontent.com/hugin-and-munin/legal-entities/main/src/Protos/LegalEntities.proto</SourceUrl>
+    </Protobuf>
+  </ItemGroup>
+
+</Project>

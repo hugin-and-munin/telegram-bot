@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+import "LegalEntities.proto";
+import "CredChecker.proto";
+
+package ReportProvider;
+
+service ReportProvider {
+  rpc Get (ReportRequest) returns (ReportReponse);
+}
+
+message ReportRequest {
+  int64 Tin = 1;
+}
+
+// Информация о юридическом лице
+message ReportReponse {
+  // Короткое имя
+  string name = 1;
+  // ИНН
+  int64 tin = 2;
+  // Дата регистрации юридического лица
+  int64 incorporationDate = 3;
+  // Уставной капитал
+  int32 authorizedCapital = 4;
+  // Численность сотрудников
+  int32 employeesNumber = 5;
+  // Юридический адрес
+  string address = 6;
+  // Статус компании
+  LegalEntityChecker.LegalEntityStatus legalEntityStatus = 7;
+  // Статус аккредитации
+  cred_checker.CreditState accreditationState = 8;
+}
