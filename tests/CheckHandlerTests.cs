@@ -3,7 +3,7 @@ using LegalEntityChecker;
 using ReportProvider;
 using static ReportProvider.ReportProvider;
 
-namespace Bot.Tests;
+namespace TelegramBot.Tests;
 
 [TestClass]
 public class CheckHandlerTests

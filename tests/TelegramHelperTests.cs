@@ -1,4 +1,4 @@
-namespace Bot.Tests;
+namespace TelegramBot.Tests;
 
 [TestClass]
 public class TelegramHelperTests

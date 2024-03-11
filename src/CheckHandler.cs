@@ -3,7 +3,7 @@ using CredChecker;
 using LegalEntityChecker;
 using static ReportProvider.ReportProvider;
 
-namespace Bot;
+namespace TelegramBot;
 
 public class CheckHandler(ReportProviderClient _reportProvider)
 {

@@ -1,6 +1,6 @@
 using Grpc.Core;
 
-namespace Bot.Tests;
+namespace TelegramBot.Tests;
 
 public static class TestHelpers
 {

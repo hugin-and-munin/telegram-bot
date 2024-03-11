@@ -1,6 +1,6 @@
 using Telegram.Bot.Types;
 
-namespace Bot;
+namespace TelegramBot;
 
 public static class TelegramHelper
 {
