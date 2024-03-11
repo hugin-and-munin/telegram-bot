@@ -46,7 +46,7 @@ public class CheckHandler(ReportProviderClient _reportProvider)
         }).AppendLine();
 
         // Сервис аккредитации
-        sb.AppendFormat("Аккредитация Минфры: {0}", report.AccreditationState switch
+        sb.AppendFormat("Аккредитация Минцифры: {0}", report.AccreditationState switch
         {
             CreditState.Unknown => "❔Нет данных",
             CreditState.Credited => "✅ Аккредитована",
