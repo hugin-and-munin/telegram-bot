@@ -27,11 +27,7 @@ public class Worker(
 
         var (command, commandText, chatId) = update.Message.ParseTelegramCommand();
 
-        if (command == TelegramCommands.Unknown)
-        {
-            await client.SendTextMessageAsync(chatId, $"Неизвестная команда", cancellationToken: ct);
-            return;
-        }
+        if (command == TelegramCommands.Unknown) return;
 
         Task task = command switch
         {
