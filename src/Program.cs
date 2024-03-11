@@ -1,9 +1,13 @@
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using TelegramBot;
 using static ReportProvider.ReportProvider;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration.AddEnvironmentVariables();
+
+builder.WebHost.ConfigureKestrel(kestrel =>
+    kestrel.ConfigureEndpointDefaults(listen => listen.Protocols = HttpProtocols.Http2));
 
 var config = builder.Configuration;
 var appOptions = config.GetSection(AppOptions.Name).Get<AppOptions>() ?? throw new InvalidOperationException();
