@@ -10,6 +10,7 @@ var appOptions = config.GetSection(AppOptions.Name).Get<AppOptions>() ?? throw n
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddHttpClient();
+builder.Services.AddGrpc();
 builder.Services.AddHostedService<Worker>();
 builder.Services.Configure<AppOptions>(config.GetSection(AppOptions.Name));
 builder.Services.AddSingleton<CheckHandler>();
