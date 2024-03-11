@@ -1,27 +1,25 @@
-using Grpc.Core;
-using Grpc.Health.V1;
-using Telegram.Bot;
-using static Grpc.Health.V1.HealthCheckResponse.Types;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace TelegramBot;
 
-public class HealthCheck(TelegramBotClient _telegramBot, ILogger<HealthCheck> _logger) : Health.HealthBase
+public class HealthCheck : IHealthCheck
 {
-    public override async Task<HealthCheckResponse> Check(HealthCheckRequest request, ServerCallContext context)
+    public Task<HealthCheckResult> CheckHealthAsync(
+        HealthCheckContext context,
+        CancellationToken cancellationToken = default)
     {
-        ServingStatus status;
+        var isHealthy = true;
 
-        try
+        // ...
+
+        if (isHealthy)
         {
-            var me = await _telegramBot.GetMeAsync(context.CancellationToken);
-            status = ServingStatus.Serving;
-        }
-        catch (Exception e)
-        {
-            status = ServingStatus.NotServing;
-            _logger.LogError(e, "Healthcheck failed.");
+            return Task.FromResult(
+                HealthCheckResult.Healthy("A healthy result."));
         }
 
-        return new HealthCheckResponse() { Status = status };
+        return Task.FromResult(
+            new HealthCheckResult(
+                context.Registration.FailureStatus, "An unhealthy result."));
     }
 }
