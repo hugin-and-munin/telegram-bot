@@ -23,10 +23,10 @@ public class CheckHandler(ReportProviderClient _reportProvider)
         sb.AppendFormat("<b>ℹ️ Основная информация</b>").AppendLine().AppendLine();
         sb.AppendFormat("ИНН: <code>{0}</code>", report.Tin).AppendLine();
         sb.AppendFormat("Дата регистрации: {0:yyyy-MM-dd}", DateTimeOffset.FromUnixTimeSeconds(report.IncorporationDate)).AppendLine();
-        sb.AppendFormat("Уставный капитал: {0:N0} ₽", report.AuthorizedCapital, CultureInfo.GetCultureInfo("ru-RU")).AppendLine();
+        sb.AppendFormat(CultureInfo.GetCultureInfo("ru-RU"), "Уставный капитал: {0:N0} ₽", report.AuthorizedCapital).AppendLine();
         if (report.EmployeesNumber > 0)
         {
-            sb.AppendFormat("Количество сотрудников: {0:N0}", report.EmployeesNumber).AppendLine();
+            sb.AppendFormat(CultureInfo.GetCultureInfo("ru-RU"), "Количество сотрудников: {0:N0}", report.EmployeesNumber).AppendLine();
         }
         else
         {
