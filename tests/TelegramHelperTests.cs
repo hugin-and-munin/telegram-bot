@@ -19,6 +19,11 @@ public class TelegramHelperTests
     [DataRow("/check 92233720368547758079", false, -1)]
     [DataRow("/check -92233720368547758079", false, -1)]
     [DataRow("/check            ", false, -1)]
+    [DataRow("/check", false, -1)]
+    [DataRow("/check@it_hugin_and_munin_bot", false, -1)]
+    [DataRow("/check@", false, -1)]
+    [DataRow("/check@asdas", false, -1)]
+    [DataRow("/check@asdas 7704414297", false, -1)]
     public void TryGetTinReturnsCorrectTin(string command, bool expectedResult, long expectedTin)
     {
         // Act

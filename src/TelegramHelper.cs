@@ -35,13 +35,24 @@ public static class TelegramHelper
     {
         var span = command.AsSpan();
 
+        // Remove command
         span = span["/check".Length..];
+        if (span.Length == 0)
+        {
+            tin = -1;
+            return false;
+        }
 
         // Remove bot name
-        if (span[0] == '@') span = span[(_botName.Length + 1)..];
+        if (span[0] == '@' && span[1..].StartsWith(_botName)) span = span[(_botName.Length + 1)..];
+        if (span.Length == 0)
+        {
+            tin = -1;
+            return false;
+        }
+
         // Remove leading spaces
         if (span[0] == ' ') span = span[1..];
-
         span = span.Trim();
 
         // ИНН российского юридического лица - последовательность из 10 цифр
