@@ -19,7 +19,7 @@ message GetDigitalMinistryCreditsStateRequest {
 }
 
 message GetDigitalMinistryCreditsStateResponse {
-  string name = 1;
+  /* string name = 1; */
   string inn = 2;
   CreditState state = 3;
 }
