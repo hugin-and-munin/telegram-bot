@@ -35,7 +35,7 @@ public class CheckHandlerTests
         Name = "ООО \"ЯНДЕКС.ТЕХНОЛОГИИ\"",
         Address = "119021,  Г.Москва, УЛ. ЛЬВА ТОЛСТОГО, Д. 16",
         AuthorizedCapital = 60000000,
-        EmployeesNumber = -1,
+        EmployeesNumber = 0,
         IncorporationDate = new DateTimeOffset(2017, 05, 19, 0, 0, 0, 0, TimeSpan.Zero).ToUnixTimeSeconds(),
         LegalEntityStatus = LegalEntityStatus.Active,
         AccreditationState = CreditState.Credited

@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices.Marshalling;
 using System.Text;
 using Telegram.Bot.Types;
 
@@ -5,6 +6,7 @@ namespace TelegramBot;
 
 public static class TelegramHelper
 {
+    private static readonly string _botName = "it_hugin_and_munin_bot";
     public static (TelegramCommands Command, string Text, long ChatId) ParseTelegramCommand(this Message message)
     {
         if (string.IsNullOrEmpty(message.Text))
@@ -31,10 +33,19 @@ public static class TelegramHelper
     /// <returns>True if the TIN is successfully extracted, otherwise false</returns>
     public static bool TryGetTin(string command, out long tin)
     {
-        var tinSpan = command.AsSpan()["/check".Length..].Trim();
+        var span = command.AsSpan();
+
+        span = span["/check".Length..];
+
+        // Remove bot name
+        if (span[0] == '@') span = span[(_botName.Length + 1)..];
+        // Remove leading spaces
+        if (span[0] == ' ') span = span[1..];
+
+        span = span.Trim();
 
         // ИНН российского юридического лица - последовательность из 10 цифр
-        if (!long.TryParse(tinSpan, out tin) ||
+        if (!long.TryParse(span, out tin) ||
             tin < 1_000_000_000 ||
             tin > 9_999_999_999)
         {
@@ -51,7 +62,7 @@ public static class TelegramHelper
         sb.Append("<a href=\"https://github.com/hugin-and-munin\">GitHub</a>");
         sb.Append(" | ");
         sb.Append("<a href=\"https://t.me/it_hugin_and_munin\">Telegram</a>");
-        return sb;       
+        return sb;
     }
 }
 

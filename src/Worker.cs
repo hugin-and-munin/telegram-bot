@@ -1,6 +1,7 @@
 using System.Text;
 using Microsoft.Extensions.Options;
 using Telegram.Bot;
+using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
@@ -46,27 +47,74 @@ public class Worker(
 
         _logger.LogInformation("Telegram Bot message handler started");
 
-        await client.ReceiveAsync(HandleUpdate, HandleError, cancellationToken: ct);
+        await client.ReceiveAsync(
+            HandleUpdate,
+            HandleError,
+            receiverOptions: new ReceiverOptions()
+            {
+                AllowedUpdates = []
+            },
+            cancellationToken: ct);
     }
 
-    private async Task HandleUpdate(ITelegramBotClient client, Update update, CancellationToken ct)
+    private Task HandleUpdate(
+        ITelegramBotClient client,
+        Update update,
+        CancellationToken ct) => update switch
+        {
+            { CallbackQuery: not null } x => HandleCallback(client, x.CallbackQuery, ct),
+            { Message: not null } x => HandleMessage(client, x.Message, ct),
+            _ => Task.CompletedTask
+        };
+
+    private Task HandleCallback(
+        ITelegramBotClient client,
+        CallbackQuery callbackQuery,
+        CancellationToken ct)
     {
-        // Ignore such updates
-        if (update.Message == null) return;
+        client.EditMessageReplyMarkupAsync(
+            callbackQuery.Message!.Chat.Id, 
+            callbackQuery.Message.MessageId, 
+            cancellationToken: ct);
+            
+        var span = callbackQuery.Data.AsSpan();
+        var separator = span.IndexOf('-');
+        var tin = long.Parse(span[(separator + 1)..]);
+        var task = span[..separator] switch
+        {
+            "reviews" => Task.CompletedTask,
+            "salaries" => Task.CompletedTask,
+            "legal_entities" => HandleExtendedLegalEntities(client, tin, ct),
+            _ => throw new NotSupportedException()
+        };
 
-        var (command, commandText, chatId) = update.Message.ParseTelegramCommand();
+        return task;
+    }
 
-        if (command == TelegramCommands.Unknown) return;
+    private Task HandleExtendedLegalEntities(
+        ITelegramBotClient client,
+        long tin,
+        CancellationToken ct)
+    {
+        return Task.CompletedTask;
+    }
 
-        Task task = command switch
+    private Task HandleMessage(
+        ITelegramBotClient client,
+        Message message,
+        CancellationToken ct)
+    {
+        var (command, commandText, chatId) = message.ParseTelegramCommand();
+
+        if (command == TelegramCommands.Unknown) return Task.CompletedTask;
+
+        return command switch
         {
             TelegramCommands.Start => StartHandle(client, chatId, ct),
             TelegramCommands.Help => HelpHandle(client, chatId, ct),
             TelegramCommands.Check => CheckHandler(client, chatId, commandText, ct),
             _ => Task.CompletedTask
         };
-
-        await task;
     }
 
     private Task<Message> StartHandle(
@@ -91,11 +139,18 @@ public class Worker(
                 parseMode: ParseMode.Html,
                 cancellationToken: ct);
 
-    private async Task CheckHandler(ITelegramBotClient client, long chatId, string commandText, CancellationToken ct)
+    private async Task CheckHandler(
+        ITelegramBotClient client,
+        long chatId,
+        string commandText,
+        CancellationToken ct)
     {
         if (!TelegramHelper.TryGetTin(commandText, out var tin))
         {
-            await client.SendTextMessageAsync(chatId, $"Неправильный ИНН", cancellationToken: ct);
+            await client.SendTextMessageAsync(
+                chatId,
+                $"Неправильный ИНН",
+                cancellationToken: ct);
             return;
         }
 
@@ -103,15 +158,18 @@ public class Worker(
 
         if (report == default)
         {
-            await client.SendTextMessageAsync(chatId, $"Компания с таким ИНН не найдена", cancellationToken: ct);
+            await client.SendTextMessageAsync(
+                chatId,
+                $"Компания с таким ИНН не найдена",
+                cancellationToken: ct);
             return;
         }
 
         var buttons = new[]
         {
-            InlineKeyboardButton.WithCallbackData("🗣️ Отзывы", $"2"),
-            InlineKeyboardButton.WithCallbackData("💲 Зарплаты", $"3"),
-            InlineKeyboardButton.WithCallbackData("⚖️ Юридическая информация", $"1"),
+            InlineKeyboardButton.WithCallbackData("🗣️ Отзывы", $"reviews-{tin}"),
+            InlineKeyboardButton.WithCallbackData("💲 Зарплаты", $"salaries-{tin}"),
+            InlineKeyboardButton.WithCallbackData("⚖️ Юридическая информация", $"legal_entites-{tin}"),
         };
 
         var replyMarkup = new InlineKeyboardMarkup(buttons.Chunk(2));
@@ -125,7 +183,10 @@ public class Worker(
             cancellationToken: ct);
     }
 
-    private async Task HandleError(ITelegramBotClient client, Exception exception, CancellationToken ct)
+    private async Task HandleError(
+        ITelegramBotClient client,
+        Exception exception,
+        CancellationToken ct)
     {
         _logger.LogError(exception, "Unhandled exception");
         await Task.CompletedTask;

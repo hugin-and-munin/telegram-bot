@@ -4,6 +4,8 @@ namespace TelegramBot.Tests;
 public class TelegramHelperTests
 {
     [DataTestMethod]
+    [DataRow("/check@it_hugin_and_munin_bot 7704414297", true, 7704414297L)]
+    [DataRow("/check@it_hugin_and_munin_bot7704414297", true, 7704414297L)]
     [DataRow("/check 7704414297", true, 7704414297L)]
     [DataRow("/check    7704414297", true, 7704414297L)]
     [DataRow("/check 7704414297   ", true, 7704414297L)]
