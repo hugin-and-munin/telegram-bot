@@ -1,3 +1,4 @@
+using System.Text;
 using Microsoft.Extensions.Options;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -11,9 +12,37 @@ public class Worker(
     IOptionsMonitor<AppOptions> _appOptions,
     CheckHandler _checkHandler) : BackgroundService
 {
+    private readonly string _startMessage = new StringBuilder()
+        .AppendLine("<b>👋 Привет! Я - бот, который многое знает об IT компаниях.</b>")
+        .AppendLine()
+        .AppendLine("Напиши <code>/check ИНН компании</code>, и я покажу информацию о ней.")
+        .AppendLine()
+        .AppendLine("Чтобы узнать больше, напиши /help.")
+        .AppendFooter()
+        .ToString();
+
+    private readonly string _helpMessage = new StringBuilder()
+        .AppendLine("<b>Hugin & Munin Bot.</b>")
+        .AppendLine()
+        .AppendLine("Доступные команды:")
+        .AppendLine()
+        .AppendLine("/check - проверить компанию по ИНН.")
+        .AppendLine("/help - помощь по боту.")
+        .AppendFooter()
+        .ToString();
+
     protected override async Task ExecuteAsync(CancellationToken ct)
     {
         var client = new TelegramBotClient(_appOptions.CurrentValue.TelegramToken);
+
+        var commands = new BotCommand[]
+        {
+            new () { Command = "start", Description = "Начать работу с ботом" },
+            new () { Command = "help", Description = "Помощь" },
+            new () { Command = "check", Description = "Проверить компанию по ИНН" }
+        };
+
+        await client.SetMyCommandsAsync(commands, cancellationToken: ct);
 
         _logger.LogInformation("Telegram Bot message handler started");
 
@@ -31,6 +60,8 @@ public class Worker(
 
         Task task = command switch
         {
+            TelegramCommands.Start => StartHandle(client, chatId, ct),
+            TelegramCommands.Help => HelpHandle(client, chatId, ct),
             TelegramCommands.Check => CheckHandler(client, chatId, commandText, ct),
             _ => Task.CompletedTask
         };
@@ -38,15 +69,42 @@ public class Worker(
         await task;
     }
 
+    private Task<Message> StartHandle(
+        ITelegramBotClient client,
+        long chatId,
+        CancellationToken ct) =>
+            client.SendTextMessageAsync(
+                chatId,
+                _startMessage,
+                disableWebPagePreview: true,
+                parseMode: ParseMode.Html,
+                cancellationToken: ct);
+
+    private Task<Message> HelpHandle(
+        ITelegramBotClient client,
+        long chatId,
+        CancellationToken ct) =>
+            client.SendTextMessageAsync(
+                chatId,
+                _helpMessage,
+                disableWebPagePreview: true,
+                parseMode: ParseMode.Html,
+                cancellationToken: ct);
+
     private async Task CheckHandler(ITelegramBotClient client, long chatId, string commandText, CancellationToken ct)
     {
-        if (!TelegramHelper.TryGetTin(commandText, out var tin)) return;
+        if (!TelegramHelper.TryGetTin(commandText, out var tin))
+        {
+            await client.SendTextMessageAsync(chatId, $"Неправильный ИНН", cancellationToken: ct);
+            return;
+        }
 
         var report = await _checkHandler.Handle(tin, ct);
 
-        if (string.IsNullOrEmpty(report))
+        if (report == default)
         {
-            await client.SendTextMessageAsync(chatId, $"Не могу найти компанию с таким ИНН", cancellationToken: ct);
+            await client.SendTextMessageAsync(chatId, $"Компания с таким ИНН не найдена", cancellationToken: ct);
+            return;
         }
 
         var buttons = new[]
@@ -60,7 +118,7 @@ public class Worker(
 
         await client.SendTextMessageAsync(
             chatId,
-            report,
+            report.AppendFooter().ToString(),
             disableWebPagePreview: true,
             parseMode: ParseMode.Html,
             replyMarkup: replyMarkup,

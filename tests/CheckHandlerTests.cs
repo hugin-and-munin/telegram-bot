@@ -26,7 +26,7 @@ public class CheckHandlerTests
 
         // Assert
         reportProviderClientMock.Verify(x => x.GetAsync(It.Is<ReportRequest>(r => r.Tin == tin), default, default, default), Times.Once);
-        actualReport.Should().Be(expectedReport);
+        actualReport!.ToString().Should().Be(expectedReport);
     }
 
     public static ReportReponse ExpectetReportResponse => new()

@@ -7,22 +7,19 @@ namespace TelegramBot;
 
 public class CheckHandler(ReportProviderClient _reportProvider)
 {
-    public async Task<string> Handle(long tin, CancellationToken ct)
+    public async Task<StringBuilder?> Handle(long tin, CancellationToken ct)
     {
         var request = new ReportProvider.ReportRequest() { Tin = tin };
 
         var report = await _reportProvider.GetAsync(request, cancellationToken: ct);
 
-        if (report is null)
-        {
-            return string.Empty;
-        }
+        if (report is null) return null;
 
         var sb = new StringBuilder();
         sb.AppendFormat("<b>{0}</b>", report.Name).AppendLine().AppendLine();
 
         // Сервис данных юридических лиц
-        sb.AppendFormat("<b>Основная информация</b>").AppendLine().AppendLine();
+        sb.AppendFormat("<b>ℹ️ Основная информация</b>").AppendLine().AppendLine();
         sb.AppendFormat("ИНН: <code>{0}</code>", report.Tin).AppendLine();
         sb.AppendFormat("Дата регистрации: {0:yyyy-MM-dd}", DateTimeOffset.FromUnixTimeSeconds(report.IncorporationDate)).AppendLine();
         sb.AppendFormat("Уставный капитал: {0:N0} ₽", report.AuthorizedCapital).AppendLine();
@@ -55,17 +52,13 @@ public class CheckHandler(ReportProviderClient _reportProvider)
         }).AppendLine();
 
         // Сервис отзывов
-        sb.AppendLine().AppendFormat("<b>Отзывы</b>").AppendLine().AppendLine();
-        sb.AppendFormat("{0} негативных отзывов", "x").AppendLine();
+        sb.AppendLine().AppendFormat("<b>🗣️ Отзывы</b>").AppendLine().AppendLine();
+        sb.AppendFormat("{0}", "TODO").AppendLine();
 
         // Сервис зарплат
-        sb.AppendLine().AppendFormat("<b>Зарплата</b>").AppendLine().AppendLine();
-        sb.AppendFormat("Медиана: {0}", "TODO");
+        sb.AppendLine().AppendFormat("<b>💲 Зарплата</b>").AppendLine().AppendLine();
+        sb.AppendFormat("{0}", "TODO");
 
-        sb.AppendLine();
-        sb.AppendLine();
-        sb.AppendLine("<a href=\"https://github.com/hugin-and-munin\">GitHub</a> | <a href=\"https://t.me/it_hugin_and_munin\">Telegram</a>");
-
-        return sb.ToString();
+        return sb;
     }
 }

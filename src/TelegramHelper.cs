@@ -1,3 +1,4 @@
+using System.Text;
 using Telegram.Bot.Types;
 
 namespace TelegramBot;
@@ -15,6 +16,8 @@ public static class TelegramHelper
 
         return span switch
         {
+            var s when s.StartsWith("/start") => (TelegramCommands.Start, message.Text, message.Chat.Id),
+            var s when s.StartsWith("/help") => (TelegramCommands.Help, message.Text, message.Chat.Id),
             var s when s.StartsWith("/check") => (TelegramCommands.Check, message.Text, message.Chat.Id),
             _ => (TelegramCommands.Unknown, string.Empty, message.Chat.Id)
         };
@@ -28,17 +31,34 @@ public static class TelegramHelper
     /// <returns>True if the TIN is successfully extracted, otherwise false</returns>
     public static bool TryGetTin(string command, out long tin)
     {
-        tin = 0L;
-
         var tinSpan = command.AsSpan()["/check".Length..].Trim();
-        if (tinSpan.Length != 10 || !long.TryParse(tinSpan, out tin)) return false;
+
+        // ИНН российского юридического лица - последовательность из 10 цифр
+        if (!long.TryParse(tinSpan, out tin) ||
+            tin < 1_000_000_000 ||
+            tin > 9_999_999_999)
+        {
+            tin = -1;
+            return false;
+        }
 
         return true;
+    }
+
+    public static StringBuilder AppendFooter(this StringBuilder sb)
+    {
+        sb.AppendLine();
+        sb.Append("<a href=\"https://github.com/hugin-and-munin\">GitHub</a>");
+        sb.Append(" | ");
+        sb.Append("<a href=\"https://t.me/it_hugin_and_munin\">Telegram</a>");
+        return sb;       
     }
 }
 
 public enum TelegramCommands
 {
     Unknown = 0,
-    Check = 1
+    Start = 1,
+    Help = 2,
+    Check = 3,
 };
