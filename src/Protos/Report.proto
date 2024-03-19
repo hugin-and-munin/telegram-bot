@@ -31,4 +31,6 @@ message ReportReponse {
   LegalEntityChecker.LegalEntityStatus legalEntityStatus = 7;
   // Статус аккредитации
   cred_checker.CreditState accreditationState = 8;
+  // Есть сведения о невыплате зарплаты
+  bool salaryDelays = 9;
 }

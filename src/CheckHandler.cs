@@ -52,6 +52,12 @@ public class CheckHandler(ReportProviderClient _reportProvider)
             _ => throw new NotSupportedException($"{report.AccreditationState} not supported"),
         }).AppendLine();
 
+        if (report.SalaryDelays)
+        {
+            sb.AppendLine().AppendFormat("<b>⚠️ Негативные сведения</b>").AppendLine().AppendLine();
+            sb.AppendLine("- Задержка зарплаты");
+        }
+
         // Сервис отзывов
         sb.AppendLine().AppendFormat("<b>🗣️ Отзывы</b>").AppendLine().AppendLine();
         sb.AppendFormat("{0}", "TODO").AppendLine();
