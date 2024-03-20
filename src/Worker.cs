@@ -168,7 +168,7 @@ public class Worker(
         var buttons = new[]
         {
             InlineKeyboardButton.WithCallbackData("🗣️ Отзывы", $"reviews-{tin}"),
-            InlineKeyboardButton.WithCallbackData("💲 Зарплаты", $"salaries-{tin}"),
+            InlineKeyboardButton.WithCallbackData("💰 Зарплаты", $"salaries-{tin}"),
             InlineKeyboardButton.WithCallbackData("⚖️ Юридическая информация", $"legal_entites-{tin}"),
         };
 

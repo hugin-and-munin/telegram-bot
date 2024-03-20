@@ -19,11 +19,12 @@ public class CheckHandler(ReportProviderClient _reportProvider)
         var sb = new StringBuilder();
         sb.AppendFormat("<b>{0}</b>", report.Name).AppendLine().AppendLine();
 
-        // Сервис данных юридических лиц
+        // Основная информация
         sb.AppendFormat("<b>ℹ️ Основная информация</b>").AppendLine().AppendLine();
         sb.AppendFormat("ИНН: <code>{0}</code>", report.Tin).AppendLine();
         sb.AppendFormat("Дата регистрации: {0:yyyy-MM-dd}", DateTimeOffset.FromUnixTimeSeconds(report.IncorporationDate)).AppendLine();
         sb.AppendFormat(CultureInfo.GetCultureInfo("ru-RU"), "Уставный капитал: {0:N0} ₽", report.AuthorizedCapital).AppendLine();
+        
         if (report.EmployeesNumber > 0)
         {
             sb.AppendFormat(CultureInfo.GetCultureInfo("ru-RU"), "Количество сотрудников: {0:N0}", report.EmployeesNumber).AppendLine();
@@ -32,38 +33,52 @@ public class CheckHandler(ReportProviderClient _reportProvider)
         {
             sb.AppendLine("Количество сотрудников: нет данных");
         }
-        sb.AppendFormat("Юридический адрес: <a href=\"https://yandex.com/maps?text={0}\">{1}</a>", report.Address.Replace(' ', '.'), report.Address).AppendLine();
-        sb.AppendFormat("Статус компании: {0}", report.LegalEntityStatus switch
+        
+        sb.AppendFormat("📍 <a href=\"https://yandex.com/maps?text={0}\">{1}</a>", report.Address.Replace(' ', '.'), report.Address).AppendLine();
+        
+        if (report.AccreditationState == CreditState.Credited)
         {
-            LegalEntityStatus.Active => "Действующая",
-            LegalEntityStatus.Bankruptcy => "❗В процессе банкротства",
-            LegalEntityStatus.InReorganizationProcess => "❔В процессе реорганизации",
-            LegalEntityStatus.InTerminationProcess => "❗В процессе ликвидации",
-            LegalEntityStatus.Terminated => "❗Ликвидирована",
-            _ => throw new NotSupportedException($"{report.LegalEntityStatus} not supported"),
-        }).AppendLine();
-
-        // Сервис аккредитации
-        sb.AppendFormat("Аккредитация Минцифры: {0}", report.AccreditationState switch
-        {
-            CreditState.Unknown => "❔Нет данных",
-            CreditState.Credited => "✅ Аккредитована",
-            CreditState.NotCredited => "❌ Нет аккредитации",
-            _ => throw new NotSupportedException($"{report.AccreditationState} not supported"),
-        }).AppendLine();
-
-        if (report.SalaryDelays)
-        {
-            sb.AppendLine().AppendFormat("<b>⚠️ Негативные сведения</b>").AppendLine().AppendLine();
-            sb.AppendLine("- Задержка зарплаты");
+            sb.AppendLine("✅ Аккредитация Минцифры");
         }
 
-        // Сервис отзывов
+        // Негативные сведения
+        if (report.LegalEntityStatus != LegalEntityStatus.Active ||
+            report.AccreditationState != CreditState.Credited ||
+            report.SalaryDelays)
+        {
+            sb.AppendLine().AppendFormat("<b>⚠️ Негативные сведения</b>").AppendLine().AppendLine();
+
+            if (report.AccreditationState != CreditState.Credited)
+            {
+                sb.AppendLine("❗️Нет аккредитации Минцифры");
+            }
+
+            if (report.LegalEntityStatus == LegalEntityStatus.Bankruptcy)
+            {
+                sb.AppendLine("❗️Компания в процессе банкротства");
+            }
+            else if (report.LegalEntityStatus == LegalEntityStatus.InReorganizationProcess)
+            {
+                sb.AppendLine("❗️Компания в процессе реорганизации");
+            }
+            else if (report.LegalEntityStatus == LegalEntityStatus.InTerminationProcess)
+            {
+                sb.AppendLine("❗️Компания в процессе ликвидации");
+            }
+            else if (report.LegalEntityStatus == LegalEntityStatus.Terminated)
+            {
+                sb.AppendLine("❗️Компания ликвидирована");
+            }
+
+            if (report.SalaryDelays) sb.AppendLine("❗️Задерживают зарплату");
+        }
+
+        // Отзывы
         sb.AppendLine().AppendFormat("<b>🗣️ Отзывы</b>").AppendLine().AppendLine();
         sb.AppendFormat("{0}", "TODO").AppendLine();
 
-        // Сервис зарплат
-        sb.AppendLine().AppendFormat("<b>💲 Зарплата</b>").AppendLine().AppendLine();
+        // Зарплаты
+        sb.AppendLine().AppendFormat("<b>💰 Зарплата</b>").AppendLine().AppendLine();
         sb.AppendFormat("{0}", "TODO").AppendLine();
 
         return sb;
