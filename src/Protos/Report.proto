@@ -6,15 +6,18 @@ import "CredChecker.proto";
 package ReportProvider;
 
 service ReportProvider {
-  rpc Get (ReportRequest) returns (ReportReponse);
+  rpc GetGeneralInfo (ReportRequest) returns (GeneralInfo);
+  rpc GetLegalEntityInfo (ReportRequest) returns (LegalEntityChecker.LegalEntityInfo);
+  rpc GetReviewsInfo (ReportRequest) returns (ReviewsInfo);
+  rpc GetSalariesInfo (ReportRequest) returns (SalariesInfo);
 }
 
 message ReportRequest {
   int64 Tin = 1;
 }
 
-// Информация о юридическом лице
-message ReportReponse {
+// Основная информация о компании
+message GeneralInfo {
   // Короткое имя
   string name = 1;
   // ИНН
@@ -32,5 +35,21 @@ message ReportReponse {
   // Статус аккредитации
   cred_checker.CreditState accreditationState = 8;
   // Есть сведения о невыплате зарплаты
-  bool salaryDelays = 9;
+  bool salaryDelays = 9;  
+  // Год
+  int32 year = 10;
+  // Выручка
+  double income = 11;
+  // Прибыль (убыток)
+  double profit = 12;
+}
+
+// Зарплаты
+message SalariesInfo {
+
+}
+
+// Отзывы
+message ReviewsInfo {
+
 }

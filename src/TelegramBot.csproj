@@ -34,5 +34,11 @@
       <SourceUrl>https://raw.githubusercontent.com/hugin-and-munin/legal-entities/main/src/Protos/LegalEntities.proto</SourceUrl>
     </Protobuf>
   </ItemGroup>
+  
+  <ItemGroup>
+    <None Update="Resources/**/*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 
 </Project>
