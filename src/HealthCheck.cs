@@ -1,8 +1,10 @@
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Telegram.Bot;
 
 namespace TelegramBot;
 
+[ExcludeFromCodeCoverage]
 public class HealthCheck(TelegramBotClient _telegramBot, ILogger<HealthCheck> _logger) : IHealthCheck
 {
     public async Task<HealthCheckResult> CheckHealthAsync(

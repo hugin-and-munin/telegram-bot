@@ -19,7 +19,7 @@ public static class TinParser
         span = span switch
         {
             _ when span.StartsWith("/check") => span["/check".Length..],
-            _ when span.StartsWith("check-") => span["check-".Length..],
+            _ when span.StartsWith("check-") => span["check-".Length..span.LastIndexOf('-')],
             _ => string.Empty,
         };
 

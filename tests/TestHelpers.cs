@@ -1,12 +1,37 @@
 using CredChecker;
 using Grpc.Core;
 using LegalEntityChecker;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using ReportProvider;
+using static ReportProvider.ReportProvider;
 
 namespace TelegramBot.Tests;
 
 public static class TestHelpers
 {
+    public static (Mock<ITelegramClientAdapter>, Mock<ReportProviderClient>, TelegramBotState) GetMock()
+    {
+        var options = Options.Create(new AppOptions()
+        {
+            TelegramToken = "token",
+            ReportProviderUri = "report-provider-url",
+            NotificationsChatId = 111,
+            NotificationsTopicId = 222,
+        });
+        var logger = Mock.Of<ILogger<TelegramBotState>>(MockBehavior.Strict);
+        var telegramClient = new Mock<ITelegramClientAdapter>(MockBehavior.Strict);
+        var reportProviderClient = new Mock<ReportProviderClient>(MockBehavior.Strict);
+        reportProviderClient
+            .Setup(x => x.GetGeneralInfoAsync(It.Is<ReportRequest>(x => x.Tin == 7703475603), default, default, default))
+            .Returns(CreateAsyncUnaryCall(OzonGeneralInfo));
+        reportProviderClient
+            .Setup(x => x.GetLegalEntityInfoAsync(It.Is<ReportRequest>(x => x.Tin == 7703475603), default, default, default))
+            .Returns(CreateAsyncUnaryCall(OzonLegalEntityInfo));
+        var botState = new TelegramBotState(options, logger, telegramClient.Object, reportProviderClient.Object);
+        return (telegramClient, reportProviderClient, botState);
+    }
+
     public static AsyncUnaryCall<TResponse> CreateAsyncUnaryCall<TResponse>(TResponse response)
     {
         return new AsyncUnaryCall<TResponse>(

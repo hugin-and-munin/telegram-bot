@@ -1,19 +1,18 @@
-using Microsoft.Extensions.Options;
+using System.Diagnostics.CodeAnalysis;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 
 namespace TelegramBot;
 
+[ExcludeFromCodeCoverage]
 public class Worker(
     ILogger<Worker> _logger,
-    IOptions<AppOptions> _appOptions, 
+    TelegramBotClient _client, 
     TelegramBotState _telegramBotState) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken ct)
     {
-        var client = new TelegramBotClient(_appOptions.Value.TelegramToken);
-
         var commands = new BotCommand[]
         {
             new () { Command = "start", Description = "Начать работу с ботом" },
@@ -22,17 +21,14 @@ public class Worker(
             new () { Command = "check", Description = "Проверить компанию по ИНН" }
         };
 
-        await client.SetMyCommandsAsync(commands, cancellationToken: ct);
+        await _client.SetMyCommandsAsync(commands, cancellationToken: ct);
 
         _logger.LogInformation("Telegram Bot message handler started");
 
-        await client.ReceiveAsync(
-            _telegramBotState.HandleUpdate,
-            _telegramBotState.HandleError,
-            receiverOptions: new ReceiverOptions()
-            {
-                AllowedUpdates = []
-            },
+        await _client.ReceiveAsync(
+            async (_, update, ct) => await _telegramBotState.HandleUpdate(update, ct),
+            async (_, ex, ct) => await _telegramBotState.HandleError(ex, "ReceiveAsync threw exception.", ct),
+            receiverOptions: new ReceiverOptions() { AllowedUpdates = [] },
             cancellationToken: ct);
     }
 }

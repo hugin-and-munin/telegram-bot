@@ -9,6 +9,7 @@ public class TinParserTests
     [DataRow("/check 7704414297", true, 7704414297L)]
     [DataRow("/check    7704414297", true, 7704414297L)]
     [DataRow("/check 7704414297   ", true, 7704414297L)]
+    [DataRow("check-7704414297-333", true, 7704414297L)] // callback
     [DataRow("/check7704414297", true, 7704414297L)]
     [DataRow("/check 77a04414297", false, -1)]
     [DataRow("/check 77044142976666", false, -1)]

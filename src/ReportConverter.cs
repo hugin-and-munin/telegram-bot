@@ -8,9 +8,15 @@ namespace TelegramBot;
 
 public static class ReportConverter
 {
-    private static readonly CultureInfo ruCulture = CultureInfo.GetCultureInfo("ru-RU");
+    private static readonly CultureInfo _culture = CultureInfo.GetCultureInfo("ru-RU");
+    private static readonly string _footer;
 
-    public static StringBuilder ToTelegramMessage(GeneralInfo report)
+    static ReportConverter()
+    {
+        _footer = File.OpenText("./Resources/Footer.html").ReadToEnd();
+    }
+
+    public static string ToTelegramMessage(GeneralInfo report)
     {
         var sb = new StringBuilder();
         sb.AppendFormat("<b>{0}</b>", report.Name).AppendLine().AppendLine();
@@ -19,11 +25,11 @@ public static class ReportConverter
         sb.AppendFormat("<b>ℹ️ Основная информация</b>").AppendLine().AppendLine();
         sb.AppendFormat("ИНН: <code>{0}</code>", report.Tin).AppendLine();
         sb.AppendFormat("Дата регистрации: {0:yyyy-MM-dd}", DateTimeOffset.FromUnixTimeSeconds(report.IncorporationDate)).AppendLine();
-        sb.AppendFormat(ruCulture, "Уставный капитал: {0:N0} ₽", report.AuthorizedCapital).AppendLine();
+        sb.AppendFormat(_culture, "Уставный капитал: {0:N0} ₽", report.AuthorizedCapital).AppendLine();
 
         if (report.EmployeesNumber > 0)
         {
-            sb.AppendFormat(ruCulture, "Количество сотрудников: {0:N0}", report.EmployeesNumber).AppendLine();
+            sb.AppendFormat(_culture, "Количество сотрудников: {0:N0}", report.EmployeesNumber).AppendLine();
         }
         else
         {
@@ -36,7 +42,7 @@ public static class ReportConverter
         {
             sb.AppendLine("✅ Аккредитация Минцифры");
         }
-        sb.AppendFormat(report.Profit > 0 ? "Прибыль за {0} год: {1:N0} ₽" : "⚠️ Убыток за {0} год: {1:N0} ₽", report.Year, report.Profit).AppendLine();
+        sb.AppendFormat(_culture, report.Profit > 0 ? "Прибыль за {0} год: {1:N0} ₽" : "⚠️ Убыток за {0} год: {1:N0} ₽", report.Year, report.Profit).AppendLine();
 
         // Негативные сведения
         if (report.LegalEntityStatus != LegalEntityStatus.Active ||
@@ -70,10 +76,10 @@ public static class ReportConverter
             if (report.SalaryDelays) sb.AppendLine("❗️Задерживают зарплату");
         }
 
-        return sb;
+        return sb.AppendLine().Append(_footer).ToString();
     }
 
-    public static StringBuilder ToTelegramMessage(LegalEntityInfo report)
+    public static string ToTelegramMessage(LegalEntityInfo report)
     {
         var sb = new StringBuilder();
 
@@ -87,11 +93,11 @@ public static class ReportConverter
         sb.AppendFormat("<b>⚖️ Юридическая информация</b>").AppendLine().AppendLine();
         sb.AppendFormat("ИНН: <code>{0}</code>", basicInfo.Tin).AppendLine();
         sb.AppendFormat("Дата регистрации: {0:yyyy-MM-dd}", DateTimeOffset.FromUnixTimeSeconds(basicInfo.IncorporationDate)).AppendLine();
-        sb.AppendFormat(ruCulture, "Уставный капитал: {0:N0} ₽", basicInfo.AuthorizedCapital).AppendLine();
+        sb.AppendFormat(_culture, "Уставный капитал: {0:N0} ₽", basicInfo.AuthorizedCapital).AppendLine();
 
         if (basicInfo.EmployeesNumber > 0)
         {
-            sb.AppendFormat(ruCulture, "Количество сотрудников: {0:N0}", basicInfo.EmployeesNumber).AppendLine();
+            sb.AppendFormat(_culture, "Количество сотрудников: {0:N0}", basicInfo.EmployeesNumber).AppendLine();
         }
         else
         {
@@ -113,8 +119,8 @@ public static class ReportConverter
         sb.AppendFormat("Статус: {0}", statusString).AppendLine().AppendLine();
 
         sb.AppendLine("<b>👤 Руководитель</b>").AppendLine();
-        sb.AppendFormat("Должность: {0}", ruCulture.TextInfo.ToTitleCase(basicInfo.Manager.Position.ToLower())).AppendLine();
-        sb.AppendFormat("Имя: {0}", ruCulture.TextInfo.ToTitleCase(basicInfo.Manager.Name.ToLower())).AppendLine();
+        sb.AppendFormat("Должность: {0}", _culture.TextInfo.ToTitleCase(basicInfo.Manager.Position.ToLower())).AppendLine();
+        sb.AppendFormat("Имя: {0}", _culture.TextInfo.ToTitleCase(basicInfo.Manager.Name.ToLower())).AppendLine();
         sb.AppendFormat("ИНН: <code>{0}</code>", basicInfo.Manager.Tin).AppendLine().AppendLine();
 
         sb.AppendLine("<b>💼 Учредители</b>").AppendLine();
@@ -124,24 +130,24 @@ public static class ReportConverter
             sb.AppendFormat("{0}", shareholder.Name).AppendLine();
             if (shareholder.Tin > 0) sb.AppendFormat("ИНН: <code>{0}</code>", shareholder.Tin).AppendLine();
             else sb.AppendFormat("ИНН: отсутствует (иностранное юрлицо)", shareholder.Tin).AppendLine();
-            sb.AppendFormat("Доля: {0:N0} ₽ ({1:N2})", shareholder.Share, shareholder.Size).AppendLine().AppendLine();
+            sb.AppendFormat(_culture, "Доля: {0:N0} ₽ ({1:N2})", shareholder.Share, shareholder.Size).AppendLine().AppendLine();
         }
 
         sb.AppendFormat("<b>📈 Финансовая информация за {0} год</b>", financeInfo.Year).AppendLine().AppendLine();
 
-        sb.AppendFormat("Доходы: {0:N0} ₽", financeInfo.Income).AppendLine();
-        sb.AppendFormat(financeInfo.Profit > 0 ? "Прибыль: {0:N0} ₽" : "⚠️ Убыток: {0:N0} ₽", financeInfo.Profit).AppendLine();
-        sb.AppendFormat("Дебиторская задолженность: {0:N0} ₽", financeInfo.AccountsReceivable).AppendLine();
-        sb.AppendFormat("Капитал и резервы: {0:N0} ₽", financeInfo.CapitalAndReserves).AppendLine();
-        sb.AppendFormat("Долгосрочные обязательства: {0:N0} ₽", financeInfo.LongTermLiabilities).AppendLine();
-        sb.AppendFormat("Краткосрочные обязательства: {0:N0} ₽", financeInfo.CurrentLiabilities).AppendLine();
-        sb.AppendFormat("Платежи на оплату труда работников: {0:N0} ₽", financeInfo.PaidSalary).AppendLine();
+        sb.AppendFormat(_culture, "Доходы: {0:N0} ₽", financeInfo.Income).AppendLine();
+        sb.AppendFormat(_culture, financeInfo.Profit > 0 ? "Прибыль: {0:N0} ₽" : "⚠️ Убыток: {0:N0} ₽", financeInfo.Profit).AppendLine();
+        sb.AppendFormat(_culture, "Дебиторская задолженность: {0:N0} ₽", financeInfo.AccountsReceivable).AppendLine();
+        sb.AppendFormat(_culture, "Капитал и резервы: {0:N0} ₽", financeInfo.CapitalAndReserves).AppendLine();
+        sb.AppendFormat(_culture, "Долгосрочные обязательства: {0:N0} ₽", financeInfo.LongTermLiabilities).AppendLine();
+        sb.AppendFormat(_culture, "Краткосрочные обязательства: {0:N0} ₽", financeInfo.CurrentLiabilities).AppendLine();
+        sb.AppendFormat(_culture, "Платежи на оплату труда работников: {0:N0} ₽", financeInfo.PaidSalary).AppendLine();
 
         if (proceedingsInfo.Count > 0)
         {
-            sb.AppendFormat("⚠️ Есть долг по зарплате перед сотрудниками: {0}", proceedingsInfo.Amount).AppendLine();
+            sb.AppendFormat(_culture, "⚠️ Есть долг по зарплате перед сотрудниками: {0:N0} ₽", proceedingsInfo.Amount).AppendLine();
         }
 
-        return sb;
+        return sb.AppendLine().Append(_footer).ToString();
     }
 }

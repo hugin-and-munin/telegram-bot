@@ -10,7 +10,7 @@ public class ReportConverterTests
     [DynamicData(nameof(GeneralInfoTestData))]
     public void ConvertGeneralInfo(GeneralInfo generalInfo)
     {
-        // Arrange & 
+        // Arrange
         var expected = File.OpenText($"./Samples/general-info-{generalInfo.Tin}.html").ReadToEnd();
 
         // Act
@@ -31,7 +31,7 @@ public class ReportConverterTests
     [DynamicData(nameof(LegalEntityInfoTestData))]
     public void ConvertLegalEntityInfo(LegalEntityInfo legalEntityInfo)
     {
-        // Arrange & 
+        // Arrange
         var expected = File.OpenText($"./Samples/legal-entity-info-{legalEntityInfo.BasicInfo.Tin}.html").ReadToEnd();
 
         // Act
