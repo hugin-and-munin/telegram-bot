@@ -1,0 +1,28 @@
+@startuml
+actor User as usr
+participant Bot as bot
+participant "Hugin & Munin" as hnm
+participant "Accreditation" as acc
+participant "Legal Entities" as lei
+participant "Salaries" as si
+participant "Reviews" as ri
+
+usr -> bot: /check
+alt The user has to select the mode
+bot -> usr: select the mode
+usr -> bot: selected `general` mode
+else Mode selected
+bot -> hnm: get general info
+hnm -> acc: get accreditation info
+hnm <- acc: accreditation info
+hnm -> lei: get legal entities info
+hnm <- lei: legal entities info
+hnm -> si: get salaries
+hnm <- si: salaries
+hnm -> ri: get reviews
+hnm <- ri: reviews
+bot <- hnm: general info
+usr <- bot: general info
+end
+
+@enduml
