@@ -265,7 +265,7 @@ public class TelegramBotState
                     .Where(x => x.Type == EntityType.Company)
                     .Select(x => (x.Name, x.Tin))
                     // .Append((report.BasicInfo.Manager.Name, report.BasicInfo.Manager.Tin))
-                    .Select(entity => new CallbackData(entity.Name, $"check-{userId}-{entity.Tin}"))
+                    .Select(entity => new CallbackData(entity.Name, $"check-{entity.Tin}-{userId}"))
                     .ToArray();
                 return new SendLegalEntityReport(source, legalEntityInfoReport, callbackData, 1);
             case Mode.Reviews:
